@@ -8,9 +8,9 @@ def exposed_bits(n, to_check):
 
 def is_positive(n):
     if n >= 0:
-        return exposed_bits(n, True)
+        return exposed_bits(n, 1)
     else:
-        return exposed_bits(~n, False) + 1
+        return exposed_bits(~n, 0) + 1
 
 def solve(n):
     return is_positive(n)
