@@ -1,27 +1,27 @@
+import functools
+
 def deprecated(since=None, will_be_removed=None):
     def decorator(func):
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
             name = func.__name__
-            if since and will_be_removed:
-                print(f"Warning: function {name} is deprecated since version {since}. It will be removed in version {will_be_removed}.")
-            elif since:
-                print(f"Warning: function {name} is deprecated since version {since}. It will be removed in future versions.")
-            elif will_be_removed:
-                print(f"Warning: function {name} is deprecated. It will be removed in version {will_be_removed}.")
-            else:
-                print(f"Warning: function {name} is deprecated. It will be removed in future versions.")
-
+            message_prefix = f"Warning: function {name} is deprecated."
+            since_message = f" It is deprecated since version {since}." if since else ""
+            removal_message = f" It will be removed in version {will_be_removed}." if will_be_removed else " It will be removed in future versions."
+            print(message_prefix + since_message + removal_message)
             return func(*args, **kwargs)
+        
         return wrapper
-    return decorator 
+    
+    return decorator
 
 @deprecated()
 def foo():
     print("Hello from foo")
 
 @deprecated(since="4.2.0", will_be_removed="5.0.1")
-def bar():
-    print("Hello from bar")
+def bar(x, y):
+    print(f"Hello from bar with arguments: {x} and {y}")
 
 foo()
-bar()
+bar(10, 20)
