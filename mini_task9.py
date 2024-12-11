@@ -5,6 +5,7 @@ class Node:
         self.prev = None
         self.next = None
 
+
 class LRUCache:
     def __init__(self, capacity=16):
         self.capacity = capacity
@@ -21,6 +22,8 @@ class LRUCache:
         self.tail.prev = node
 
     def _remove_node(self, node):
+        if node is self.head or node is self.tail:
+            raise Exception("Cannot remove head or tail nodes.")
         prev_node = node.prev
         next_node = node.next
         prev_node.next = next_node
@@ -48,9 +51,10 @@ class LRUCache:
             self._add_node(new_node)
 
             if len(self.cache) > self.capacity:
-                lru_node = self.head.next 
+                lru_node = self.head.next
                 self._remove_node(lru_node)
                 del self.cache[lru_node.key]
+
 
 def fibonacci(n, cache):
     if n in cache.cache:
