@@ -1,11 +1,12 @@
 def singleton(cls):
-    instances = {}
-    
+    instance = None
+
     def get_instance(*args, **kwargs):
-        if cls not in instances:
-            instances[cls] = cls(*args, **kwargs)
-        return instances[cls]
-    
+        nonlocal instance
+        if instance is None:
+            instance = cls(*args, **kwargs)  
+        return instance 
+
     return get_instance
 
 class Counter:
@@ -29,3 +30,4 @@ gc1.increment()
 gc1.increment()
 
 assert id(gc1) == id(gc2)
+assert gc1.get_count() == 2  
