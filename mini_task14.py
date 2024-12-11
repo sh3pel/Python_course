@@ -1,77 +1,82 @@
-import time
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+import time
 
 def generate_random_field(size):
     return np.random.choice([0, 1], size=(size, size), p=[0.5, 0.5])
 
-def game_of_life_python(field, iterations):
-    field = field.tolist()  #NUMPY -> list
-    rows, cols = len(field), len(field[0])
+def game_of_life_numpy(field):
+    new_field = np.zeros_like(field)
+    neighbors = (np.roll(field, 1, 0) + np.roll(field, -1, 0) +
+                 np.roll(field, 1, 1) + np.roll(field, -1, 1) +
+                 np.roll(np.roll(field, 1, 0), 1, 1) + np.roll(np.roll(field, 1, 0), -1, 1) +
+                 np.roll(np.roll(field, -1, 0), 1, 1) + np.roll(np.roll(field, -1, 0), -1, 1))
+
+    new_field[(field == 1) & (neighbors == 2)] = 1
+    new_field[(field == 1) & (neighbors == 3)] = 1
+    new_field[(field == 0) & (neighbors == 3)] = 1
+
+    return new_field
+
+def game_of_life_python(field):
+    size = len(field)
+    new_field = [[0] * size for _ in range(size)]
+
+    for i in range(size):
+        for j in range(size):
+            alive = sum(field[x][y] for x in range(max(0, i - 1), min(size, i + 2))
+                        for y in range(max(0, j - 1), min(size, j + 2)) if (x != i or y != j))
+            if field[i][j] == 1:
+                new_field[i][j] = 1 if alive in (2, 3) else 0
+            else:
+                new_field[i][j] = 1 if alive == 3 else 0
+
+    return new_field
+
+def update(frame):
+    global numpy_field, python_field
+    numpy_field = game_of_life_numpy(numpy_field)
+    python_field = game_of_life_python(python_field)
     
-    for _ in range(iterations):
-        new_field = [[0]*cols for _ in range(rows)]
-        for i in range(rows):
-            for j in range(cols):
-                alive_neighbors = sum(field[x][y] for x in range(i-1, i+2) for y in range(j-1, j+2)
-                if 0 <= x < rows and 0 <= y < cols and (x != i or y != j))
-                if field[i][j] == 1 and alive_neighbors in (2, 3):
-                    new_field[i][j] = 1
-                elif field[i][j] == 0 and alive_neighbors == 3:
-                    new_field[i][j] = 1
-        field = new_field
+    ax1.clear()
+    ax2.clear()
     
-    return field
-
-def game_of_life_numpy(field, iterations):
-    rows, cols = field.shape
+    ax1.set_title("Game of Life - NumPy")
+    ax2.set_title("Game of Life - Python Lists")
     
-    for _ in range(iterations):
-        new_field = np.zeros((rows, cols), dtype=int)
-        for i in range(rows):
-            for j in range(cols):
-                alive_neighbors = np.sum(field[i-1:i+2, j-1:j+2]) - field[i, j]
-                if field[i, j] == 1 and alive_neighbors in (2, 3):
-                    new_field[i, j] = 1
-                elif field[i, j] == 0 and alive_neighbors == 3:
-                    new_field[i, j] = 1
-        field = new_field
-    
-    return field
+    ax1.imshow(numpy_field, cmap='binary')
+    ax2.imshow(python_field, cmap='binary')
 
-initial_field = generate_random_field(128)
 
-import matplotlib.pyplot as plt
+size = 128
+field_size = 128
+iterations = 128
 
-# Генерируем начальное поле
-initial_field = generate_random_field(128)
+initial_field = generate_random_field(field_size)
 
-# Запуск игры с обычным списком
-start_time_python = time.time()
-final_field_python = game_of_life_python(initial_field, 128)
-end_time_python = time.time()
-python_time = end_time_python - start_time_python
-
-# Запуск игры с NumPy
+#Считаем время для NumPy
 start_time_numpy = time.time()
-final_field_numpy = game_of_life_numpy(initial_field, 128)
+field_numpy = initial_field.copy()
+for _ in range(iterations):
+    field_numpy = game_of_life_numpy(field_numpy)
 end_time_numpy = time.time()
 numpy_time = end_time_numpy - start_time_numpy
 
-# Сообщаем результаты
-print(f"Время выполнения с обычным Python массивом: {python_time:.4f} секунд")
-print(f"Время выполнения с NumPy массивом: {numpy_time:.4f} секунд")
+#Считаем время для Python lists
+start_time_python = time.time()
+field_python = initial_field.tolist()
+for _ in range(iterations):
+    field_python = game_of_life_python(field_python)
+end_time_python = time.time()
+python_time = end_time_python - start_time_python
 
-# Визуализация результатов
-plt.figure(figsize=(12, 6))
-
-plt.subplot(1, 2, 1)
-plt.title('Результат с обычным Python массивом')
-plt.imshow(final_field_python, cmap='binary')
-plt.axis('off')
-
-plt.subplot(1, 2, 2)
-plt.title('Результат с использованием NumPy массива')
-plt.imshow(final_field_numpy, cmap='binary')
-plt.axis('off')
-
+#анимация
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+numpy_field = initial_field.copy() 
+python_field = initial_field.tolist()
+animation = FuncAnimation(fig, update, interval=200, cache_frame_data=False)
 plt.show()
+
+print(f"Время выполнения NumPy: {numpy_time:.5f} секунд")
+print(f"Время выполнения Python (списки): {python_time:.5f} секунд")
