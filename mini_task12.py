@@ -1,4 +1,7 @@
+import functools
+
 def coroutine(f):
+    @functools.wraps(f) 
     def result(*args, **kwargs):
         c = f(*args, **kwargs)
         next(c) 
@@ -17,7 +20,8 @@ def storage():
             values.add(val)
 
 st = storage()
+
 print(st.send(42))
-print(st.send(42))
-print(st.send(13))
-print(st.send(13))
+print(st.send(42)) 
+print(st.send(13)) 
+print(st.send(13))  
