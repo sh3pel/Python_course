@@ -13,11 +13,13 @@ def deprecated(since=None, will_be_removed=None):
         
         return wrapper
     
+    if callable(since) or (since is None and callable(will_be_removed)):
+        return decorator(since)
     return decorator
 
-@deprecated()
+@deprecated
 def foo():
-    print("Hello from foo")
+    print("Hello from foo.")
 
 @deprecated(since="4.2.0", will_be_removed="5.0.1")
 def bar(x, y):
