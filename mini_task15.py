@@ -46,3 +46,4 @@ def main(consumers_count):
 if __name__ == '__main__':
     for threads in range(50):
         print(f"{main(threads)} seconds, {threads} threads")
+# без гила у меня получается быстрее на 0.001 сек
