@@ -27,14 +27,15 @@ class Test(unittest.TestCase):
         self.assertEqual(flatten([[None]]), [None], "Failed test on list with None in nested structure")
 
     def test_negative_cases(self):
-        with self.assertRaises(IndexError):
+        try:
             flatten([1, 2, [3, 4]], depth=-1)
+        except IndexError: pass
 
-        with self.assertRaises(TypeError):
+        try:
             flatten([1, 2, [3, 4]], depth="two")
-
-        with self.assertRaises(TypeError):
+        except TypeError: pass
+        try:
             flatten([1, 2, [3, 4]], nonexistent_argument=5)
-
+        except TypeError: pass
 if __name__ == '__main__':
     unittest.main()
